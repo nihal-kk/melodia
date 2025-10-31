@@ -17,7 +17,7 @@ export const ImageSwiper = () => {
   ];
 
   return (
-    <div className="flex justify-center items-center w-full">
+    <div className="flex justify-center items-center w-[350px] sm:w-full mx-auto">
       <Swiper
         modules={[Navigation, Pagination, Scrollbar, A11y, Autoplay]}
         spaceBetween={20}
@@ -25,32 +25,24 @@ export const ImageSwiper = () => {
         slidesPerGroup={1}
         loop={true}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
+        pagination={{ clickable: true }}
+        scrollbar={{ draggable: true }}
         breakpoints={{
-          640: {
-            slidesPerView: 1,
-            slidesPerGroup: 1,
-            spaceBetween: 10,
-          },
-          768: {
-            slidesPerView: 1,
-            slidesPerGroup: 1,
-            spaceBetween: 15,
-          },
-          1024: {
-            slidesPerView: 1,
-            slidesPerGroup: 1,
-            spaceBetween: 20,
-          },
+          640: { spaceBetween: 10 },
+          768: { spaceBetween: 15 },
+          1024: { spaceBetween: 20 },
         }}
-        className="w-full max-w-[1200px] h-[auto]" // container scales with screen
+        className="w-full max-w-[1200px] h-full"
       >
         {images.map((src, index) => (
           <SwiperSlide key={index}>
-            <img
-              src={src}
-              alt={`Slide ${index + 1}`}
-              className="w-full h-auto object-cover rounded-lg"
-            />
+            <div className="w-full h-full sm:h-[350px] md:h-[450px] lg:h-[550px] xl:h-[650px]">
+              <img
+                src={src}
+                alt={`Slide ${index + 1}`}
+                className="w-full h-full object-cover rounded-xl"
+              />
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>

@@ -12,8 +12,8 @@ import {
   Palette,
 } from "lucide-react";
 import { logout } from "../redux/authSlice";
-import { useDispatch } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import { setAccentColor } from "../redux/themeSlice";
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -21,11 +21,11 @@ export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState("English");
   const [audioQuality, setAudioQuality] = useState("High");
-  const [accent, setAccent] = useState("#FF9E2E");
+
   const dispatch = useDispatch();
+  const { accentColor } = useSelector((state) => state.theme); // ✅ get global color
 
-
-  // 🔥 Fetch user from backend (simulate logged-in user)
+  // 🔥 Fetch logged-in user
   useEffect(() => {
     fetch("https://melodia-data-5.onrender.com/users?loggedIn=true")
       .then((res) => res.json())
@@ -46,8 +46,7 @@ export default function Settings() {
     alert("Logged out successfully!");
     setUser(null);
     dispatch(logout());
-    
-    window.location.href='/login'
+    window.location.href = "/login";
   };
 
   // 🔴 Delete account handler
@@ -59,22 +58,30 @@ export default function Settings() {
       });
       alert("Account deleted successfully!");
       setUser(null);
-    dispatch(logout());
-
-    window.location.href='/login'
-
-
+      dispatch(logout());
+      window.location.href = "/login";
     }
+  };
+
+  // 🎨 Handle color change globally
+  const handleColorChange = (e) => {
+    const newColor = e.target.value;
+    dispatch(setAccentColor(newColor)); // update Redux color
   };
 
   return (
     <div className="md:ml-64 mt-10 w-full max-w-[1280px] mx-auto p-6 text-white">
-      <h2 className="text-2xl font-bold text-[#FF9E2E] mb-6">Settings</h2>
+      <h2
+        className="text-2xl font-bold mb-6"
+        style={{ color: accentColor }}
+      >
+        Settings
+      </h2>
 
       {/* Profile Section */}
       <div className="bg-[#1a1a1a] p-5 rounded-2xl shadow-lg mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <User className="text-[#FF9E2E]" />
+          <User style={{ color: accentColor }} />
           <h3 className="text-lg font-semibold">Profile</h3>
         </div>
 
@@ -90,7 +97,13 @@ export default function Settings() {
             <p>
               <span className="font-medium text-white">Plan:</span> {user.plan}
             </p>
-            <button className="mt-3 px-4 py-2 bg-[#FF9E2E] text-black font-semibold rounded-lg hover:bg-[#ffb85d] transition">
+            <button
+              className="mt-3 px-4 py-2 font-semibold rounded-lg transition"
+              style={{
+                backgroundColor: accentColor,
+                color: "#000",
+              }}
+            >
               Edit Profile
             </button>
           </div>
@@ -102,16 +115,19 @@ export default function Settings() {
       {/* Theme Section */}
       <div className="bg-[#1a1a1a] p-5 rounded-2xl shadow-lg mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <Palette className="text-[#FF9E2E]" />
+          <Palette style={{ color: accentColor }} />
           <h3 className="text-lg font-semibold">Appearance</h3>
         </div>
+
+        {/* Dark Mode Toggle */}
         <div className="flex justify-between items-center mb-4">
           <p className="text-gray-300 text-sm">Dark Mode</p>
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`flex items-center justify-center w-12 h-6 rounded-full transition-all ${
-              darkMode ? "bg-[#FF9E2E]" : "bg-gray-600"
-            }`}
+            className={`flex items-center justify-center w-12 h-6 rounded-full transition-all`}
+            style={{
+              backgroundColor: darkMode ? accentColor : "#555",
+            }}
           >
             <span
               className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
@@ -121,12 +137,13 @@ export default function Settings() {
           </button>
         </div>
 
+        {/* Accent Color Picker */}
         <div className="flex justify-between items-center">
           <p className="text-gray-300 text-sm">Accent Color</p>
           <input
             type="color"
-            value={accent}
-            onChange={(e) => setAccent(e.target.value)}
+            value={accentColor}
+            onChange={handleColorChange}
             className="w-10 h-6 rounded cursor-pointer"
           />
         </div>
@@ -135,7 +152,7 @@ export default function Settings() {
       {/* Audio Section */}
       <div className="bg-[#1a1a1a] p-5 rounded-2xl shadow-lg mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <Volume2 className="text-[#FF9E2E]" />
+          <Volume2 style={{ color: accentColor }} />
           <h3 className="text-lg font-semibold">Audio Preferences</h3>
         </div>
         <div className="flex justify-between items-center">
@@ -155,7 +172,7 @@ export default function Settings() {
       {/* Notifications */}
       <div className="bg-[#1a1a1a] p-5 rounded-2xl shadow-lg mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <Bell className="text-[#FF9E2E]" />
+          <Bell style={{ color: accentColor }} />
           <h3 className="text-lg font-semibold">Notifications</h3>
         </div>
         <div className="flex items-center justify-between">
@@ -172,7 +189,7 @@ export default function Settings() {
       {/* Language Section */}
       <div className="bg-[#1a1a1a] p-5 rounded-2xl shadow-lg mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <Globe className="text-[#FF9E2E]" />
+          <Globe style={{ color: accentColor }} />
           <h3 className="text-lg font-semibold">Language</h3>
         </div>
         <select
@@ -190,13 +207,19 @@ export default function Settings() {
       {/* Privacy Section */}
       <div className="bg-[#1a1a1a] p-5 rounded-2xl shadow-lg mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <Lock className="text-[#FF9E2E]" />
+          <Lock style={{ color: accentColor }} />
           <h3 className="text-lg font-semibold">Privacy & Security</h3>
         </div>
         <p className="text-gray-400 text-sm mb-3">
           Control your account visibility and data sharing preferences.
         </p>
-        <button className="px-4 py-2 bg-[#FF9E2E] text-black font-semibold rounded-lg hover:bg-[#ffb85d] transition">
+        <button
+          className="px-4 py-2 font-semibold rounded-lg transition"
+          style={{
+            backgroundColor: accentColor,
+            color: "#000",
+          }}
+        >
           Manage Privacy
         </button>
       </div>
@@ -205,12 +228,16 @@ export default function Settings() {
       {user && (
         <div className="bg-[#1a1a1a] p-5 rounded-2xl shadow-lg">
           <h3 className="flex items-center gap-3 text-lg font-semibold mb-3">
-            <LogOut className="text-[#FF9E2E]" /> Account Management
+            <LogOut style={{ color: accentColor }} /> Account Management
           </h3>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-[#FF9E2E] text-black rounded-lg hover:bg-[#ffb85d] transition"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition"
+              style={{
+                backgroundColor: accentColor,
+                color: "#000",
+              }}
             >
               <LogOut className="w-4 h-4" /> Logout
             </button>

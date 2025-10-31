@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Scrollbar } from "swiper/modules";
+import {
+  Navigation,
+  Pagination,
+  Scrollbar,
+  Autoplay,
+  A11y,
+} from "swiper/modules";
 import { Play, Pause } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { playSong } from "../redux/playerSlice";
@@ -12,69 +18,117 @@ import "swiper/css/scrollbar";
 
 export default function LikedSlider() {
   const [songs, setSongs] = useState([]);
-     const dispatch = useDispatch();
-     const { currentSong, isPlaying } = useSelector((state) => state.player);
+  const dispatch = useDispatch();
+  const { currentSong, isPlaying } = useSelector((state) => state.player);
+  const { accentColor } = useSelector((state) => state.theme); // 🎨 Get theme color from redux
+
   useEffect(() => {
     fetch("https://melodia-data-5.onrender.com/liked")
       .then((res) => res.json())
       .then((data) => setSongs(data))
-      .catch((err) => console.log(err));
+      .catch((err) => console.error("Fetch error:", err));
   }, []);
 
-  // 🧠 Hide the section completely if no songs
-  if (!songs || songs.length === 0) {
-    return null; // 👈 Nothing rendered
-  }
-     const handlePlay = (song, index) => {
-       dispatch(playSong({ song, index, playlist: songs }));
-     };
+  if (!songs || songs.length === 0) return null; // hide section if no liked songs
+
+  const handlePlay = (song, index) => {
+    dispatch(playSong({ song, index, playlist: songs }));
+  };
+
   return (
-    <div className="mt-10 w-full max-w-[1280px] mx-auto overflow-hidden">
-      <h2 className="text-xl font-bold text-[#FF9E2E] mb-4">Liked Songs</h2>
+    <div className="mt-10 w-[350px] sm:w-full max-w-[1280px] mx-auto overflow-hidden">
+      <h2
+        className="text-1xl sm:text-2xl font-bold mb-4 sm:text-left"
+        style={{ color: accentColor }}
+      >
+        Liked Songs
+      </h2>
 
       <Swiper
-        modules={[Navigation, Pagination, Scrollbar]}
-        spaceBetween={20}
-        slidesPerView={4}
+        modules={[Navigation, Pagination, Scrollbar, Autoplay, A11y]}
+        spaceBetween={15}
+        slidesPerView={2}
         slidesPerGroup={1}
         navigation
         loop={true}
+        speed={1500}
+        autoplay={{
+          delay: 3000,
+          disableOnInteraction: false,
+        }}
         scrollbar={{ draggable: true }}
         breakpoints={{
-          320: { slidesPerView: 4, slidesPerGroup: 1 },
-          640: { slidesPerView: 2, slidesPerGroup: 1 },
+          320: { slidesPerView: 3, slidesPerGroup: 1 },
+          480: { slidesPerView: 2, slidesPerGroup: 1 },
           768: { slidesPerView: 3, slidesPerGroup: 1 },
-          1024: { slidesPerView: 5, slidesPerGroup: 1 },
+          1024: { slidesPerView: 4, slidesPerGroup: 1 },
+          1280: { slidesPerView: 5, slidesPerGroup: 1 },
         }}
       >
-        {songs.map((song) => (
-          <SwiperSlide key={song.id}>
-            <div className="relative bg-[#1a1a1a] rounded-lg overflow-hidden w-50 h-50 group">
-              <img
-                src={song.img}
-                alt={song.title}
-                className="w-full h-full object-cover rounded-lg"
-              />
+        {songs.map((song, index) => {
+          const isActive = currentSong?.id === song.id;
 
-              {/* Hover Play Button */}
-              <button
-                onClick={() => handlePlay(song)}
-                className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 opacity-0 group-hover:opacity-80 transition-opacity rounded-lg"
+          return (
+            <SwiperSlide key={song.id}>
+              <div
+                className={`relative rounded-xl overflow-hidden w-full h-full sm:h-56 md:h-60 group shadow-md transition-all duration-300`}
+                style={{
+                  backgroundColor: "#1a1a1a",
+                  boxShadow: isActive
+                    ? `0 0 20px ${accentColor}70`
+                    : `0 0 10px ${accentColor}20`,
+                  border: isActive
+                    ? `2px solid ${accentColor}`
+                    : "2px solid transparent",
+                }}
               >
-                {currentSong?.id === song.id && isPlaying ? (
-                  <Pause className="h-8 w-8 text-[#FF9E2E]" />
-                ) : (
-                  <Play className="h-8 w-8 text-[#FF9E2E]" />
-                )}
-              </button>
+                <img
+                  src={song.img}
+                  alt={song.title}
+                  className="w-full h-full object-cover rounded-xl"
+                />
 
-              <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent z-10">
-                <h3 className="text-white font-semibold text-sm">{song.title}</h3>
-                <p className="text-gray-300 text-xs">{song.artist}</p>
+                {/* Hover Play Button */}
+                <button
+                  onClick={() => handlePlay(song, index)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                >
+                  {isActive && isPlaying ? (
+                    <Pause
+                      className="h-10 w-10 sm:h-12 sm:w-12"
+                      style={{ color: accentColor }}
+                    />
+                  ) : (
+                    <Play
+                      className="h-10 w-10 sm:h-12 sm:w-12"
+                      style={{ color: accentColor }}
+                    />
+                  )}
+                </button>
+
+                {/* Title & Artist */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent z-10">
+                  <h3
+                    className="font-semibold text-sm sm:text-base truncate"
+                    style={{
+                      color: isActive ? accentColor : "#ffffff",
+                    }}
+                  >
+                    {song.title}
+                  </h3>
+                  <p
+                    className="text-xs sm:text-sm truncate"
+                    style={{
+                      color: isActive ? "#EAEAEA" : "#B3B3B3",
+                    }}
+                  >
+                    {song.artist}
+                  </p>
+                </div>
               </div>
-            </div>
-          </SwiperSlide>
-        ))}
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
     </div>
   );

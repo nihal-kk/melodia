@@ -10,6 +10,7 @@ export default function All() {
   const dispatch = useDispatch();
   const { currentSong, isPlaying } = useSelector((state) => state.player);
   const { query } = useSelector((state) => state.search);
+  const { accentColor } = useSelector((state) => state.theme); // 🎨 get color from Redux
 
   // ✅ Fetch all songs
   useEffect(() => {
@@ -21,15 +22,12 @@ export default function All() {
 
   // ✅ Handle Play + Add to history
   const handlePlay = async (song, index) => {
-    // Play the song using Redux
     dispatch(playSong({ song, index, playlist: songs }));
 
     try {
-      // Check if song already in history
       const res = await fetch(`https://melodia-data-5.onrender.com/history?songId=${song.id}`);
       const data = await res.json();
 
-      // If not found, add to history
       if (data.length === 0) {
         await fetch("https://melodia-data-5.onrender.com/history", {
           method: "POST",
@@ -58,7 +56,12 @@ export default function All() {
 
   return (
     <div className="mt-10 w-full max-w-[1280px] mx-auto overflow-hidden">
-      <h2 className="text-xl font-bold text-[#FF9E2E] mb-4">All Songs</h2>
+      <h2
+        className="text-xl font-bold mb-4"
+        style={{ color: accentColor }}
+      >
+        All Songs
+      </h2>
 
       {filteredSongs.map((song, index) => (
         <div key={song.id} className="mb-2 flex items-center">
@@ -76,9 +79,9 @@ export default function All() {
               className="absolute inset-0 flex items-center justify-start bg-black bg-opacity-70 pl-6 opacity-0 group-hover:opacity-70 transition-opacity rounded-lg"
             >
               {currentSong?.id === song.id && isPlaying ? (
-                <Pause className="h-8 w-8 text-[#FF9E2E]" />
+                <Pause className="h-8 w-8" style={{ color: accentColor }} />
               ) : (
-                <Play className="h-8 w-8 text-[#FF9E2E]" />
+                <Play className="h-8 w-8" style={{ color: accentColor }} />
               )}
             </button>
 

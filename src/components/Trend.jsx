@@ -20,6 +20,7 @@ export default function TrendSlider() {
   const [songs, setSongs] = useState([]);
   const dispatch = useDispatch();
   const { currentSong, isPlaying } = useSelector((state) => state.player);
+  const { accentColor } = useSelector((state) => state.theme); // 🎨 Get dynamic theme color
 
   useEffect(() => {
     fetch("https://melodia-data-5.onrender.com/trending")
@@ -33,8 +34,11 @@ export default function TrendSlider() {
   };
 
   return (
-    <div className="mt-10 w-full max-w-[1280px] mx-auto overflow-hidden">
-      <h2 className="text-5xl sm:text-2xl font-bold text-[#FF9E2E] mb-10 sm:text-left ">
+    <div className="mt-6 w-[350px] sm:w-full max-w-[1280px] mx-auto overflow-hidden">
+      <h2
+        className="text-1xl sm:text-2xl font-bold mb-4 sm:text-left"
+        style={{ color: accentColor }}
+      >
         Trending Songs
       </h2>
 
@@ -59,39 +63,67 @@ export default function TrendSlider() {
           1280: { slidesPerView: 5, slidesPerGroup: 1 },
         }}
       >
-        {songs.map((song, index) => (
-          <SwiperSlide key={song.id}>
-            <div className="relative bg-[#1a1a1a] rounded-xl overflow-hidden w-full h-full sm:h-56 md:h-60 group  shadow-md hover:shadow-[#FF9E2E]/30 transition-all">
-              <img
-                src={song.img}
-                alt={song.title}
-                className="w-full h-full object-cover rounded-xl"
-              />
+        {songs.map((song, index) => {
+          const isActive = currentSong?.id === song.id;
 
-              {/* Hover Play Button */}
-              <button
-                onClick={() => handlePlay(song, index)}
-                className="absolute inset-0 flex items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          return (
+            <SwiperSlide key={song.id}>
+              <div
+                className={`relative rounded-xl overflow-hidden w-full h-full sm:h-56 md:h-60 group shadow-md transition-all duration-300 ${
+                  isActive
+                    ? "border-2 shadow-lg"
+                    : "bg-[#1a1a1a] hover:shadow-md"
+                }`}
+                style={{
+                  borderColor: isActive ? accentColor : "transparent",
+                  boxShadow: isActive
+                    ? `0 0 20px ${accentColor}55`
+                    : `0 0 10px ${accentColor}30`,
+                }}
               >
-                {currentSong?.id === song.id && isPlaying ? (
-                  <Pause className="h-10 w-10 sm:h-12 sm:w-12 text-[#FF9E2E]" />
-                ) : (
-                  <Play className="h-10 w-10 sm:h-12 sm:w-12 text-[#FF9E2E]" />
-                )}
-              </button>
+                <img
+                  src={song.img}
+                  alt={song.title}
+                  className="w-full h-full object-cover rounded-xl opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                />
 
-              {/* Title & Artist */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent z-10">
-                <h3 className="text-white font-semibold text-sm sm:text-base truncate">
-                  {song.title}
-                </h3>
-                <p className="text-gray-300 text-xs sm:text-sm truncate">
-                  {song.artist}
-                </p>
+                {/* Hover Play Button */}
+                <button
+                  onClick={() => handlePlay(song, index)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                >
+                  {isActive && isPlaying ? (
+                    <Pause
+                      className="h-10 w-10 sm:h-12 sm:w-12"
+                      style={{ color: accentColor }}
+                    />
+                  ) : (
+                    <Play
+                      className="h-10 w-10 sm:h-12 sm:w-12"
+                      style={{ color: accentColor }}
+                    />
+                  )}
+                </button>
+
+                {/* Title & Artist */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent z-10">
+                  <h3
+                    className="font-semibold text-sm sm:text-base truncate"
+                    style={{ color: isActive ? accentColor : "#FFFFFF" }}
+                  >
+                    {song.title}
+                  </h3>
+                  <p
+                    className="text-xs sm:text-sm truncate"
+                    style={{ color: isActive ? "#EAEAEA" : "#B3B3B3" }}
+                  >
+                    {song.artist}
+                  </p>
+                </div>
               </div>
-            </div>
-          </SwiperSlide>
-        ))}
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
     </div>
   );

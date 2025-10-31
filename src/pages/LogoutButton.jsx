@@ -7,7 +7,10 @@ import { LogOutIcon } from "lucide-react";
 export default function LogoutButton() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user); // get user from redux
+  const user = useSelector((state) => state.auth.user);
+
+  // 🎨 Get the current accent color from Redux theme
+  const { accentColor } = useSelector((state) => state.theme);
 
   const handleLogout = async () => {
     if (!user) return;
@@ -20,7 +23,7 @@ export default function LogoutButton() {
       });
 
       dispatch(logout());
-      navigate("/login"); // smoother redirect
+      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -29,10 +32,13 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-2 bg-[#FF9E2E] text-black px-3 py-1 rounded hover:bg-[#ffa948] transition"
+      className="flex items-center gap-2 px-3 py-1 rounded transition"
+      style={{
+        backgroundColor: accentColor, // 🌈 uses global theme color
+        color: "#000",
+      }}
     >
       <LogOutIcon size={18} />
-      {/* <span>Logout</span> */}
     </button>
   );
 }

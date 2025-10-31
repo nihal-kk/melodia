@@ -12,6 +12,7 @@ import {
   X,
   LayoutDashboard,
 } from "lucide-react";
+import { useSelector } from "react-redux"; // ✅ import from Redux
 
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -32,14 +33,16 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   const USERS_URL = "https://melodia-data-5.onrender.com/users";
 
-  // ✅ Fetch user and set role
+  // ✅ Access theme from Redux
+  const { accentColor, backgroundColor, textColor } = useSelector(
+    (state) => state.theme
+  );
+
   const fetchUserRole = async () => {
     try {
       setLoading(true);
-
       const storedUser = localStorage.getItem("melodia_user");
       if (!storedUser) {
-        console.warn("No user found in localStorage");
         setRole(null);
         setLoading(false);
         return;
@@ -47,7 +50,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       const parsedUser = JSON.parse(storedUser);
       if (!parsedUser?.email) {
-        console.warn("User has no email property");
         setRole(null);
         setLoading(false);
         return;
@@ -57,13 +59,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
       const users = await res.json();
 
       const loggedUser = users.find((u) => u.email === parsedUser.email);
-
-      if (loggedUser) {
-        setRole(loggedUser.role);
-      } else {
-        console.warn("User not found in DB for email:", parsedUser.email);
-        setRole(null);
-      }
+      setRole(loggedUser ? loggedUser.role : null);
     } catch (err) {
       console.error("Error fetching user role:", err);
       setRole(null);
@@ -74,7 +70,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     fetchUserRole();
-
     const onRoleChanged = () => fetchUserRole();
     window.addEventListener("roleChanged", onRoleChanged);
     return () => window.removeEventListener("roleChanged", onRoleChanged);
@@ -94,18 +89,22 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-[#0D0D0D] border-r border-[#1a1a1a] text-[#EAEAEA] flex flex-col transform transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 flex flex-col border-r border-[#1a1a1a] transform transition-transform duration-300 md:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{ backgroundColor }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-6 border-b border-[#1a1a1a]">
+        <div
+          className="flex items-center justify-between px-6 py-6 border-b border-[#1a1a1a]"
+          style={{ color: accentColor }}
+        >
           <div className="flex items-center gap-2">
-            <Music2 className="h-7 w-7 text-[#FF9E2E]" />
-            <span className="text-xl font-bold text-[#FF9E2E]">Melodia</span>
+            <Music2 className="h-7 w-7" style={{ color: accentColor }} />
+            <span className="text-xl font-bold">Melodia</span>
           </div>
           <button onClick={onClose} className="md:hidden">
-            <X className="h-6 w-6 text-gray-400 hover:text-[#FF9E2E]" />
+            <X className="h-6 w-6 text-gray-400 hover:opacity-70" />
           </button>
         </div>
 
@@ -119,9 +118,14 @@ export const Sidebar = ({ isOpen, onClose }) => {
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-[#1a1a1a]",
-                  isActive ? "text-[#FF9E2E] bg-[#1a1a1a]" : "text-gray-400"
+                  isActive
+                    ? `bg-[#1a1a1a]`
+                    : "text-gray-400"
                 )
               }
+              style={({ isActive }) => ({
+                color: isActive ? accentColor : textColor,
+              })}
             >
               <item.icon className="h-5 w-5" />
               <span>{item.label}</span>
@@ -134,7 +138,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {/* ✅ Admin Dashboard Link */}
           {isAdmin && !loading && (
             <NavLink
               to="/admin"
@@ -142,9 +145,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-[#1a1a1a]",
-                  isActive ? "text-[#FF9E2E] bg-[#1a1a1a]" : "text-gray-400"
+                  isActive ? "bg-[#1a1a1a]" : "text-gray-400"
                 )
               }
+              style={({ isActive }) => ({
+                color: isActive ? accentColor : textColor,
+              })}
             >
               <LayoutDashboard className="h-5 w-5" />
               <span>Dashboard</span>
@@ -160,9 +166,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-[#1a1a1a]",
-                isActive ? "text-[#FF9E2E] bg-[#1a1a1a]" : "text-gray-400"
+                isActive ? "bg-[#1a1a1a]" : "text-gray-400"
               )
             }
+            style={({ isActive }) => ({
+              color: isActive ? accentColor : textColor,
+            })}
           >
             <Settings className="h-5 w-5" />
             <span>Settings</span>

@@ -8,6 +8,7 @@ export default function History() {
   const [history, setHistory] = useState([]);
   const dispatch = useDispatch();
   const { currentSong, isPlaying } = useSelector((state) => state.player);
+  const { accentColor } = useSelector((state) => state.theme); // 🎨 connected to themeSlice (Redux global color)
 
   // ✅ Fetch recently played songs
   useEffect(() => {
@@ -17,51 +18,65 @@ export default function History() {
       .catch((err) => console.error("Error loading history:", err));
   }, []);
 
-  // ✅ Handle play
+  // ✅ Handle play/pause
   const handlePlay = (song, index) => {
     dispatch(playSong({ song, index, playlist: history }));
   };
 
   return (
-    <div className="mt-10 w-full max-w-[1280px] mx-auto overflow-hidden md:ml-68">
-      <h2 className="text-xl font-bold text-[#FF9E2E] mb-4">Recently Played</h2>
+    <div className="mt-10 w-full max-w-[1280px] mx-auto md:ml-68 p-4">
+      <h2
+        className="text-xl font-bold mb-6"
+        style={{ color: accentColor }}
+      >
+        Recently Played
+      </h2>
 
       {history.length === 0 ? (
         <p className="text-gray-400">No recently played songs yet.</p>
       ) : (
-        history.map((song, index) => (
-          <div key={song.id} className="mb-2 flex items-center">
-            <div className="flex relative rounded-lg overflow-hidden w-full group">
-              <img
-                src={song.img}
-                alt={song.title}
-                className="w-20 h-20 object-cover rounded-lg"
-              />
+        <div className="flex flex-wrap gap-4">
+          {history.map((song, index) => (
+            <div
+              key={song.id}
+              className="bg-[#1a1a1a] rounded-xl overflow-hidden relative group w-[160px] md:w-[200px] transition-all hover:scale-105 hover:shadow-lg"
+            >
+              {/* 🖼 Song Image */}
+              <div className="relative">
+                <img
+                  src={song.img}
+                  alt={song.title}
+                  className="w-full h-[160px] object-cover"
+                />
 
-              {/* Hover Play Button */}
-              <button
-                onClick={() => handlePlay(song, index)}
-                className="absolute inset-0 flex items-center p-6 bg-black bg-opacity-70 opacity-0 group-hover:opacity-70 transition-opacity rounded-lg"
-              >
-                {currentSong?.id === song.id && isPlaying ? (
-                  <Pause className="h-8 w-8 text-[#FF9E2E]" />
-                ) : (
-                  <Play className="h-8 w-8 text-[#FF9E2E]" />
-                )}
-              </button>
+                {/* ▶️ Hover Play / Pause */}
+                <button
+                  onClick={() => handlePlay(song, index)}
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  {currentSong?.id === song.id && isPlaying ? (
+                    <Pause className="h-10 w-10" style={{ color: accentColor }} />
+                  ) : (
+                    <Play className="h-10 w-10" style={{ color: accentColor }} />
+                  )}
+                </button>
+              </div>
 
-              <div className="p-2">
-                <h3 className="text-white font-semibold text-sm mt-1">
+              {/* 🎶 Song Info */}
+              <div className="p-3">
+                <h3 className="text-white font-semibold text-sm truncate">
                   {song.title}
                 </h3>
-                <p className="text-gray-400 text-xs">{song.artist}</p>
+                <p className="text-gray-400 text-xs truncate">{song.artist}</p>
+              </div>
+
+              {/* ❤️ Like Button */}
+              <div className="absolute top-2 right-2">
+                <LikeButton song={song} />
               </div>
             </div>
-            <div className="ml-2 flex items-center">
-              <LikeButton song={song} />
-            </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );
