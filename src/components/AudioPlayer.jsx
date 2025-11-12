@@ -88,7 +88,7 @@ export default function AudioPlayer() {
       {/* Left - Song Info */}
       <div className="flex items-center gap-4 w-full sm:w-1/3 justify-center sm:justify-start">
         <img
-          src={currentSong?.img || "/default.jpg"}
+          src={currentSong?.img || "/photos/cover.jpg"}
           alt="cover"
           className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg object-cover shadow-md"
         />
@@ -129,6 +129,7 @@ export default function AudioPlayer() {
           </button>
 
           <button onClick={() => dispatch(playNext())} aria-label="Next">
+            
             <SkipForward
               className="w-5 h-5 sm:w-6 sm:h-6 transition"
               style={{ color: accentColor }}
@@ -157,7 +158,7 @@ export default function AudioPlayer() {
         <Volume2 className="w-6 h-6" style={{ color: accentColor }} />
         <input
           type="range"
-          min="0"
+          min="0" 
           max="1"
           step="0.01"
           value={volume}
