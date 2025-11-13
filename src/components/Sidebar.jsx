@@ -12,7 +12,7 @@ import {
   X,
   LayoutDashboard,
 } from "lucide-react";
-import { useSelector } from "react-redux"; // ✅ import from Redux
+import { useSelector } from "react-redux";
 
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -33,7 +33,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   const USERS_URL = "https://melodia-data-5.onrender.com/users";
 
-  // ✅ Access theme from Redux
   const { accentColor, backgroundColor, textColor } = useSelector(
     (state) => state.theme
   );
@@ -42,6 +41,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
     try {
       setLoading(true);
       const storedUser = localStorage.getItem("melodia_user");
+
       if (!storedUser) {
         setRole(null);
         setLoading(false);
@@ -49,6 +49,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
       }
 
       const parsedUser = JSON.parse(storedUser);
+
       if (!parsedUser?.email) {
         setRole(null);
         setLoading(false);
@@ -57,7 +58,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       const res = await fetch(USERS_URL);
       const users = await res.json();
-
       const loggedUser = users.find((u) => u.email === parsedUser.email);
       setRole(loggedUser ? loggedUser.role : null);
     } catch (err) {
@@ -118,9 +118,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-[#1a1a1a]",
-                  isActive
-                    ? `bg-[#1a1a1a]`
-                    : "text-gray-400"
+                  isActive ? "bg-[#1a1a1a]" : "text-gray-400"
                 )
               }
               style={({ isActive }) => ({
@@ -156,10 +154,30 @@ export const Sidebar = ({ isOpen, onClose }) => {
               <span>Dashboard</span>
             </NavLink>
           )}
+
+          {/* ⭐ Mobile-only Settings (under Liked) */}
+          <div className="md:hidden">
+            <NavLink
+              to="/settings"
+              onClick={onClose}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-[#1a1a1a]",
+                  isActive ? "bg-[#1a1a1a]" : "text-gray-400"
+                )
+              }
+              style={({ isActive }) => ({
+                color: isActive ? accentColor : textColor,
+              })}
+            >
+              <Settings className="h-5 w-5" />
+              <span>Settings</span>
+            </NavLink>
+          </div>
         </nav>
 
-        {/* Settings */}
-        <div className="px-3 py-4 border-t border-[#1a1a1a]">
+        {/* Desktop-only bottom settings */}
+        <div className="px-3 py-4 border-t mt-10 border-[#1a1a1a] hidden md:block">
           <NavLink
             to="/settings"
             onClick={onClose}
